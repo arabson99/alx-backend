@@ -15,4 +15,4 @@ def index_range(page: int, page_size: int) -> Tuple[int, int]:
     :param page_size:
     :return:
     """
-    return ((page -1) * page_size, page + page_size)
+    return ((page -1) * page_size, page * page_size)
