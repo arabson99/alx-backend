@@ -1,11 +1,25 @@
 #!/usr/bin/env python3
 """
-Deletion-resilient hypermedia pagination
+Hypermedia pagination
 """
-
 import csv
 import math
-from typing import List, Dict
+from typing import Tuple, List, Dict, Any
+
+
+def index_range(page: int, page_size: int) -> Tuple[int, int]:
+    """
+    return a tuple of size two containing a start
+     index and an end index corresponding to the
+     range of indexes to return in a list for
+     those particular pagination parameters
+    :param page:
+    :param page_size:
+    :return:
+    """
+    start_index = (page - 1) * page_size
+    end_index = start_index + page_size
+    return start_index, end_index
 
 
 class Server:
@@ -15,7 +29,6 @@ class Server:
 
     def __init__(self):
         self.__dataset = None
-        self.__indexed_dataset = None
 
     def dataset(self) -> List[List]:
         """Cached dataset
@@ -28,40 +41,37 @@ class Server:
 
         return self.__dataset
 
-    def indexed_dataset(self) -> Dict[int, List]:
-        """Dataset indexed by sorting position, starting at 0
+    def get_page(self, page: int = 1, page_size: int = 10) -> List[List]:
         """
-        if self.__indexed_dataset is None:
-            dataset = self.dataset()
-            truncated_dataset = dataset[:1000]
-            self.__indexed_dataset = {
-                i: dataset[i] for i in range(len(dataset))
-            }
-        return self.__indexed_dataset
-
-    def get_hyper_index(self, index: int = None, page_size: int = 10) -> Dict:
-        """
-        Returns a dictionary with key-value pairs
-         (index, next_index, page_size, data)
-        :param index:
+        Find the correct indexes to paginate dataset
+        :param page:
         :param page_size:
         :return:
         """
-        assert type(index) == int
+        assert type(page) == int
         assert type(page_size) == int
-        csv = self.indexed_dataset()
-        csv_size = len(csv)
-        assert 0 <= index < csv_size
-        data = []
-        _next = index
-        for _ in range(page_size):
-            while not csv.get(_next):
-                _next += 1
-            data.append(csv.get(_next))
-            _next += 1
+        assert page > 0
+        assert page_size > 0
+        csv_size = len(self.dataset())
+        start, end = index_range(page, page_size)
+        end = min(end, csv_size)
+        if start >= csv_size:
+            return []
+        return self.dataset()[start:end]
+
+    def get_hyper(self, page: int = 1, page_size: int = 10) -> Dict[str, Any]:
+        """
+        Return dataset as a dictionary
+        :param page:
+        :param page_size:
+        :return:
+        """
+        total_pages = math.ceil(len(self.dataset()) / page_size)
         return {
-            "index": index,
-            "data": data,
             "page_size": page_size,
-            "next_index": _next
+            "page": page,
+            "data": self.get_page(page, page_size),
+            "next_page": page + 1 if page + 1 <= total_pages else None,
+            "prev_page": page - 1 if page > 1 else None,
+            "total_pages": total_pages
         }
