@@ -19,11 +19,11 @@ To set up the project locally, follow these steps:
 
 1. Clone the repository:
    ```bash
-   git clone http:
+   git clone https://github.com/arabson99/alx-backend.git
    ```
 2. Navigate to the project directory:
    ```bash
-   cd queuing-system-in-js
+   cd 0x03-queuing-system_in_js
    ```
 3. Install the required dependencies:
    ```bash
