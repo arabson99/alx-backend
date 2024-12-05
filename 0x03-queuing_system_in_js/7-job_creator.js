@@ -54,7 +54,7 @@ jobs.forEach((jobData) => {
         if (!err) {
             console.log(`Notification job created: ${job.id}`);
         } else {
-            console.error(`Failed to create notification job: ${err}`);
+            console.error(`Failed to create notification job: ${err.message}`);
         }
     });
 
@@ -63,7 +63,7 @@ jobs.forEach((jobData) => {
     });
 
     job.on('failed', (err) => {
-        console.error(`Notification job ${job.id} failed: ${err.message}`);
+        console.error(`Notification job ${job.id} failed: ${err}`);
     });
 
     job.on('progress', (progress) => {
